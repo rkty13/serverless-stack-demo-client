@@ -1,15 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { API } from "aws-amplify";
 import { Link } from "react-router-dom";
-import { BsPencilSquare } from "react-icons/bs";
+import InputGroup from "react-bootstrap/InputGroup";
+import Form from "react-bootstrap/Form";
 import ListGroup from "react-bootstrap/ListGroup";
-import { LinkContainer } from "react-router-bootstrap";
+import debounce from "lodash.debounce";
+import NotesList from "../components/NotesList";
 import { useAppContext } from "../libs/contextLib";
 import { onError } from "../libs/errorLib";
 import "./Home.css";
 
+const DEBOUNCE_WAIT = 500;
+
 export default function Home() {
   const [notes, setNotes] = useState([]);
+  const [query, setQuery] = useState("");
   const { isAuthenticated } = useAppContext();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -36,31 +41,7 @@ export default function Home() {
     return API.get("notes", "/notes");
   }
 
-  function renderNotesList(notes) {
-    return (
-      <>
-        <LinkContainer to="/notes/new">
-          <ListGroup.Item action className="py-3 text-nowrap text-truncate">
-            <BsPencilSquare size={17} />
-            <span className="ml-2 font-weight-bold">Create a new note</span>
-          </ListGroup.Item>
-        </LinkContainer>
-        {notes.map(({ noteId, content, createdAt }) => (
-          <LinkContainer key={noteId} to={`/notes/${noteId}`}>
-            <ListGroup.Item action>
-              <span className="font-weight-bold">
-                {content.trim().split("\n")[0]}
-              </span>
-              <br />
-              <span className="text-muted">
-                Created: {new Date(createdAt).toLocaleString()}
-              </span>
-            </ListGroup.Item>
-          </LinkContainer>
-        ))}
-      </>
-    );
-  }
+  const setQueryDebounced = debounce(setQuery, DEBOUNCE_WAIT);
 
   function renderLander() {
     return (
@@ -82,8 +63,16 @@ export default function Home() {
   function renderNotes() {
     return (
       <div className="notes">
-        <h2 className="pb-3 mt-4 mb-3 border-bottom">Your Notes</h2>
-        <ListGroup>{!isLoading && renderNotesList(notes)}</ListGroup>
+        <div className="pb-3 mt-4 mb-3 border-bottom header">
+          <h2>Your Notes</h2>
+          <InputGroup className="search">
+            <Form.Control
+              placeholder="Search"
+              onChange={e => setQueryDebounced(e.target.value)}
+            />
+          </InputGroup>
+        </div>
+        <ListGroup>{!isLoading && <NotesList notes={notes} query={query} />}</ListGroup>
       </div>
     );
   }

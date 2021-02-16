@@ -7,3 +7,13 @@
   font-family: "Open Sans", sans-serif;
   font-weight: 600;
 }
+
+.Home .notes .header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.Home .notes .header .search {
+  max-width: 300px;
+}
