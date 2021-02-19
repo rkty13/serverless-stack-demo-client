@@ -1,22 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { API } from "aws-amplify";
 import { Link } from "react-router-dom";
-import InputGroup from "react-bootstrap/InputGroup";
-import Form from "react-bootstrap/Form";
 import ListGroup from "react-bootstrap/ListGroup";
-import debounce from "lodash.debounce";
 import NotesList from "../components/NotesList";
+import SearchAndReplace from "../components/SearchAndReplace";
 import { useAppContext } from "../libs/contextLib";
 import { onError } from "../libs/errorLib";
 import "./Home.css";
 
-const DEBOUNCE_WAIT = 500;
-
 export default function Home() {
   const [notes, setNotes] = useState([]);
   const [query, setQuery] = useState("");
-  const { isAuthenticated } = useAppContext();
+  const [replace, setReplace] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const { isAuthenticated } = useAppContext();
 
   useEffect(() => {
     async function onLoad() {
@@ -41,7 +38,53 @@ export default function Home() {
     return API.get("notes", "/notes");
   }
 
-  const setQueryDebounced = debounce(setQuery, DEBOUNCE_WAIT);
+  function updateNoteContent(id, newContent) {
+    return API.put("notes", `/notes/${id}`, {
+      body: {
+        content: newContent
+      }
+    });
+  }
+
+  function updateNotes() {
+    return notes.map(async note => {
+      const { noteId, content } = note;
+
+      if (!content.includes(query)) {
+        return note;
+      }
+
+      const replacedContent = content.replaceAll(query, replace);
+
+      await updateNoteContent(noteId, replacedContent);
+
+      return {
+        ...note,
+        content: replacedContent
+      }
+    })
+  }
+
+  async function onSubmitReplace() {
+    try {
+      if (!isAuthenticated) {
+        return;
+      }
+
+      setIsLoading(true);
+
+      const newNotes = updateNotes();
+      const updatedNotes = await Promise.all(newNotes);
+
+      setQuery("");
+      setReplace("");
+      setNotes(updatedNotes);
+    } catch (e) {
+      onError(e);
+    }
+
+    setIsLoading(false);
+  }
 
   function renderLander() {
     return (
@@ -65,18 +108,21 @@ export default function Home() {
       <div className="notes">
         <div className="pb-3 mt-4 mb-3 border-bottom header">
           <h2>Your Notes</h2>
-          <InputGroup className="search">
-            <Form.Control
-              placeholder="Search"
-              onChange={e => setQueryDebounced(e.target.value)}
-            />
-          </InputGroup>
+          <SearchAndReplace
+            query={query}
+            setQuery={setQuery}
+            replace={replace}
+            setReplace={setReplace}
+            onSubmit={onSubmitReplace}
+          />
         </div>
-        <ListGroup>{!isLoading && <NotesList notes={notes} query={query} />}</ListGroup>
+        <ListGroup>
+          {!isLoading && <NotesList notes={notes} query={query} />}
+        </ListGroup>
       </div>
     );
   }
-  
+
   return (
     <div className="Home">
       {isAuthenticated ? renderNotes() : renderLander()}

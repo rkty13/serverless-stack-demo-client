@@ -13,7 +13,3 @@
   flex-direction: row;
   justify-content: space-between;
 }
-
-.Home .notes .header .search {
-  max-width: 300px;
-}
