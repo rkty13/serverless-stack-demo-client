@@ -13,3 +13,10 @@
   flex-direction: row;
   justify-content: space-between;
 }
+
+@media (max-width: 575px) {
+  .Home .notes .header {
+    flex-direction: column;
+    align-items: center;
+  }
+}

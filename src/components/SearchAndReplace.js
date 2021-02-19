@@ -10,8 +10,11 @@ export default function SearchAndReplace({
   setQuery,
   setReplace,
   onSubmit,
-  isLoading
+  isLoading,
+  resultsCount
 }) {
+  const submitDisabled = !query.length || !replace.length || resultsCount === 0;
+
   return (
     <Dropdown className="SearchAndReplace">
       <Dropdown.Toggle>
@@ -19,26 +22,27 @@ export default function SearchAndReplace({
       </Dropdown.Toggle>
       <Dropdown.Menu className="py-3 px-3" align="right">
         <Form>
-        <Form.Control
-          placeholder="Search"
-          className="mb-2 input"
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-        />
-        <Form.Control
-          placeholder="Replace"
-          className="mb-2 input"
-          value={replace}
-          onChange={e => setReplace(e.target.value)}
-        />
-        <LoaderButton
-          isLoading={isLoading}
-          onClick={onSubmit}
-          variant="primary"
-          className="input"
-        >
-          Replace All
-        </LoaderButton>
+          <Form.Control
+            placeholder="Search"
+            className="mb-2 input"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+          />
+          <Form.Control
+            placeholder="Replace"
+            className="mb-2 input"
+            value={replace}
+            onChange={e => setReplace(e.target.value)}
+          />
+          <LoaderButton
+            isLoading={isLoading}
+            onClick={onSubmit}
+            variant="primary"
+            className="input"
+            disabled={submitDisabled}
+          >
+            Replace All
+          </LoaderButton>
         </Form>
       </Dropdown.Menu>
     </Dropdown>

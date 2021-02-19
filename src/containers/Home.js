@@ -124,6 +124,7 @@ export default function Home() {
             setReplace={setReplace}
             onSubmit={onSubmitReplace}
             isLoading={isLoading}
+            resultsCount={filteredNotes.length}
           />
         </div>
         <ListGroup>
