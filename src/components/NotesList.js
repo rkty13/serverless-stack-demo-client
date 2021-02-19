@@ -1,17 +1,9 @@
-import React, { useMemo } from "react";
+import React from "react";
 import ListGroup from "react-bootstrap/ListGroup";
 import { BsPencilSquare } from "react-icons/bs";
 import { LinkContainer } from "react-router-bootstrap";
 
-export default function NotesList({ notes, query }) {
-  const filteredNotes = useMemo(() => {
-    if (!query || query.length === 0) {
-      return notes;
-    }
-
-    return notes.filter(({ content }) => content.includes(query))
-  }, [notes, query]);
-
+export default function NotesList({ notes }) {
   return (
     <>
       <LinkContainer to="/notes/new">
@@ -20,7 +12,7 @@ export default function NotesList({ notes, query }) {
           <span className="ml-2 font-weight-bold">Create a new note</span>
         </ListGroup.Item>
       </LinkContainer>
-      {filteredNotes.map(({ noteId, content, createdAt }) => (
+      {notes.map(({ noteId, content, createdAt }) => (
         <LinkContainer key={noteId} to={`/notes/${noteId}`}>
           <ListGroup.Item action>
             <span className="font-weight-bold">

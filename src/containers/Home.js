@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { API } from "aws-amplify";
 import { Link } from "react-router-dom";
 import ListGroup from "react-bootstrap/ListGroup";
@@ -34,6 +34,14 @@ export default function Home() {
 
     onLoad();
   }, [isAuthenticated]);
+
+  const filteredNotes = useMemo(() => {
+    if (!query || query.length === 0) {
+      return notes;
+    }
+
+    return notes.filter(({ content }) => content.includes(query))
+  }, [notes, query]);
 
   function loadNotes() {
     return API.get("notes", "/notes");
@@ -119,7 +127,13 @@ export default function Home() {
           />
         </div>
         <ListGroup>
-          {isLoading ? <LoadingIndicator /> : <NotesList notes={notes} query={query} />}
+          {
+            isLoading ? (
+              <LoadingIndicator />
+            ) : (
+              <NotesList notes={filteredNotes} query={query} />
+            )
+          }
         </ListGroup>
       </div>
     );
