@@ -1,13 +1,19 @@
 import React from "react";
 import Dropdown from "react-bootstrap/Dropdown";
-import InputGroup from "react-bootstrap/InputGroup";
 import Form from "react-bootstrap/Form";
-import Button from "react-bootstrap/Button";
+import LoaderButton from "./LoaderButton";
 import "./SearchAndReplace.css";
 
-export default function SearchAndReplace({ query, replace, setQuery, setReplace, onSubmit }) {
+export default function SearchAndReplace({
+  query,
+  replace,
+  setQuery,
+  setReplace,
+  onSubmit,
+  isLoading
+}) {
   return (
-    <Dropdown as={InputGroup.Append} className="SearchAndReplace">
+    <Dropdown className="SearchAndReplace">
       <Dropdown.Toggle>
         Search and Replace
       </Dropdown.Toggle>
@@ -25,9 +31,14 @@ export default function SearchAndReplace({ query, replace, setQuery, setReplace,
           value={replace}
           onChange={e => setReplace(e.target.value)}
         />
-        <Button onClick={onSubmit} variant="secondary">
+        <LoaderButton
+          isLoading={isLoading}
+          onClick={onSubmit}
+          variant="primary"
+          className="input"
+        >
           Replace All
-        </Button>
+        </LoaderButton>
         </Form>
       </Dropdown.Menu>
     </Dropdown>

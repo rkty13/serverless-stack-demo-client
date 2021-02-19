@@ -61,11 +61,15 @@ export default function NewNote() {
             value={content}
             as="textarea"
             onChange={(e) => setContent(e.target.value)}
+            disabled={isLoading}
           />
         </Form.Group>
         <Form.Group controlId="file">
           <Form.Label>Attachment</Form.Label>
-          <Form.Control onChange={handleFileChange} type="file" />
+          <Form.Control
+            onChange={handleFileChange}
+            type="file"
+            disabled={isLoading} />
         </Form.Group>
         <LoaderButton
           block
@@ -73,7 +77,7 @@ export default function NewNote() {
           size="lg"
           variant="primary"
           isLoading={isLoading}
-          disabled={!validateForm()}
+          disabled={isLoading || !validateForm()}
         >
           Create
         </LoaderButton>

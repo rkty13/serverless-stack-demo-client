@@ -3,6 +3,7 @@ import Form from "react-bootstrap/Form";
 import { API, Storage } from "aws-amplify";
 import { useParams, useHistory } from "react-router-dom";
 import LoaderButton from "../components/LoaderButton";
+import LoadingIndicator from "../components/LoadingIndicator"
 import { onError } from "../libs/errorLib";
 import { s3Upload } from "../libs/awsLib";
 import config from "../config";
@@ -15,7 +16,10 @@ export default function Notes() {
   const [note, setNote] = useState(null);
   const [content, setContent] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const isFormDisabled = isSubmitting || isDeleting;
 
   useEffect(() => {
     function loadNote() {
@@ -23,6 +27,8 @@ export default function Notes() {
     }
 
     async function onLoad() {
+      setIsLoading(true);
+
       try {
         const note = await loadNote();
         const { content, attachment } = note;
@@ -36,6 +42,8 @@ export default function Notes() {
       } catch (e) {
         onError(e);
       }
+
+      setIsLoading(false);
     }
 
     onLoad();
@@ -73,7 +81,7 @@ export default function Notes() {
       return;
     }
 
-    setIsLoading(true);
+    setIsSubmitting(true);
 
     try {
       if (file.current) {
@@ -87,7 +95,7 @@ export default function Notes() {
       history.push("/");
     } catch (e) {
       onError(e);
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   }
 
@@ -117,52 +125,62 @@ export default function Notes() {
     }
   }
 
+  function renderForm() {
+    return (
+      <Form onSubmit={handleSubmit}>
+        <Form.Group controlId="content">
+          <Form.Control
+            as="textarea"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            disabled={isFormDisabled}
+          />
+        </Form.Group>
+        <Form.Group controlId="file">
+          <Form.Label>Attachment</Form.Label>
+          {note.attachment && (
+            <p>
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href={note.attachmentURL}
+              >
+                {formatFilename(note.attachment)}
+              </a>
+            </p>
+          )}
+          <Form.Control
+            onChange={handleFileChange}
+            type="file"
+            disabled={isFormDisabled}
+          />
+        </Form.Group>
+        <LoaderButton
+          block
+          size="lg"
+          type="submit"
+          isLoading={isSubmitting}
+          disabled={isFormDisabled || !validateForm()}
+        >
+          Save
+        </LoaderButton>
+        <LoaderButton
+          block
+          size="lg"
+          variant="danger"
+          onClick={handleDelete}
+          isLoading={isDeleting}
+          disabled={isFormDisabled}
+        >
+          Delete
+        </LoaderButton>
+      </Form>
+    )
+  }
+
   return (
     <div className="Notes">
-      {note && (
-        <Form onSubmit={handleSubmit}>
-          <Form.Group controlId="content">
-            <Form.Control
-              as="textarea"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-            />
-          </Form.Group>
-          <Form.Group controlId="file">
-            <Form.Label>Attachment</Form.Label>
-            {note.attachment && (
-              <p>
-                <a
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href={note.attachmentURL}
-                >
-                  {formatFilename(note.attachment)}
-                </a>
-              </p>
-            )}
-            <Form.Control onChange={handleFileChange} type="file" />
-          </Form.Group>
-          <LoaderButton
-            block
-            size="lg"
-            type="submit"
-            isLoading={isLoading}
-            disabled={!validateForm()}
-          >
-            Save
-          </LoaderButton>
-          <LoaderButton
-            block
-            size="lg"
-            variant="danger"
-            onClick={handleDelete}
-            isLoading={isDeleting}
-          >
-            Delete
-          </LoaderButton>
-        </Form>
-      )}
+      {isLoading ? <LoadingIndicator /> : note && renderForm()}
     </div>
   );
 }

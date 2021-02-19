@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import ListGroup from "react-bootstrap/ListGroup";
 import NotesList from "../components/NotesList";
 import SearchAndReplace from "../components/SearchAndReplace";
+import LoadingIndicator from "../components/LoadingIndicator";
 import { useAppContext } from "../libs/contextLib";
 import { onError } from "../libs/errorLib";
 import "./Home.css";
@@ -114,10 +115,11 @@ export default function Home() {
             replace={replace}
             setReplace={setReplace}
             onSubmit={onSubmitReplace}
+            isLoading={isLoading}
           />
         </div>
         <ListGroup>
-          {!isLoading && <NotesList notes={notes} query={query} />}
+          {isLoading ? <LoadingIndicator /> : <NotesList notes={notes} query={query} />}
         </ListGroup>
       </div>
     );
